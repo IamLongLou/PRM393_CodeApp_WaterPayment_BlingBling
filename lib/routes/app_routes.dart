@@ -6,6 +6,7 @@ import '../screens/customer/customer_list_screen.dart';
 import '../screens/sync/sync_screen.dart';
 import '../screens/history/history_screen.dart';
 import '../screens/profile/profile_screen.dart';
+import '../core/theme/app_theme.dart';
 
 class AppRoutes extends StatelessWidget {
   const AppRoutes({super.key});
@@ -15,21 +16,7 @@ class AppRoutes extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'VNPAY Nước',
-      theme: ThemeData(
-        useMaterial3: true,
-        primaryColor: Colors.blue[600],
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue[600]!,
-          primary: Colors.blue[600],
-          secondary: Colors.orange[400]!,
-        ),
-        appBarTheme: AppBarTheme(
-          centerTitle: true,
-          backgroundColor: Colors.blue[600],
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
-      ),
+      theme: AppTheme.lightTheme,
       initialRoute: "/login",
       routes: {
         "/login": (context) => const LoginScreen(),
