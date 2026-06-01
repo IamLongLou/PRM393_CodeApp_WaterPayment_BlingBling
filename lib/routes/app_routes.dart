@@ -14,29 +14,20 @@ class AppRoutes extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Điện Nước Mobile',
+      title: 'VNPAY Nước',
       theme: ThemeData(
         useMaterial3: true,
+        primaryColor: Colors.blue[600],
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueAccent,
-          primary: const Color(0xFF1E88E5),
-          secondary: const Color(0xFF00ACC1),
+          seedColor: Colors.blue[600]!,
+          primary: Colors.blue[600],
+          secondary: Colors.orange[400]!,
         ),
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           centerTitle: true,
-          backgroundColor: Color(0xFF1E88E5),
+          backgroundColor: Colors.blue[600],
           foregroundColor: Colors.white,
-          elevation: 2,
-        ),
-        cardTheme: CardThemeData(
-          elevation: 4,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
+          elevation: 0,
         ),
       ),
       initialRoute: "/login",
