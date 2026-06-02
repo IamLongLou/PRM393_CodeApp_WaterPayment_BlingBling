@@ -61,4 +61,13 @@ class BillingProvider with ChangeNotifier {
     _allBills.sort((a, b) => b.date.compareTo(a.date));
     return _allBills;
   }
+
+  Future<void> markBillsAsSynced(List<Bill> syncedBills) async {
+    for (var i = 0; i < _allBills.length; i++) {
+      if (syncedBills.any((b) => b.billCode == _allBills[i].billCode)) {
+        _allBills[i] = _allBills[i].copyWith(isSynced: true);
+      }
+    }
+    notifyListeners();
+  }
 }

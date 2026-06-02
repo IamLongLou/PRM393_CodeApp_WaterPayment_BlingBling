@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../models/customer.dart';
 import '../../models/bill.dart';
 import '../../providers/billing_provider.dart';
@@ -44,6 +45,8 @@ class PaymentScreen extends StatelessWidget {
             const SizedBox(height: 25),
             _sectionHeader(Icons.description_outlined, 'CHI TIẾT HÓA ĐƠN'),
             _buildBillDetail(consumption, amount, vat, total, format),
+            const SizedBox(height: 25),
+            _buildQRCode(total),
             const SizedBox(height: 40),
             ElevatedButton.icon(
               onPressed: () => _confirmPayment(context, consumption, total),
@@ -138,6 +141,30 @@ class PaymentScreen extends StatelessWidget {
       ],
     ),
   );
+
+  Widget _buildQRCode(double total) {
+    return Center(
+      child: Column(
+        children: [
+          const Text('QUÉT MÃ QR ĐỂ THANH TOÁN', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
+          const SizedBox(height: 15),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+            ),
+            child: QrImageView(
+              data: "Payment amount: ${total.toInt()} VND",
+              version: QrVersions.auto,
+              size: 180.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _confirmPayment(BuildContext context, int consumption, double total) async {
     final bill = Bill(customerId: customer.id!, billCode: 'INV-20231024-8892', date: DateTime.now(), oldReading: customer.currentReading, newReading: newReading, consumption: consumption.toDouble(), unitPrice: 12000, amount: total / 1.1, vat: total - (total/1.1), totalAmount: total, isSynced: false);

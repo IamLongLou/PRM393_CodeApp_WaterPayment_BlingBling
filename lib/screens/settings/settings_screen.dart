@@ -255,6 +255,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 3, // Cài đặt
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          if (index == 0) Navigator.pushReplacementNamed(context, AppRoutes.home);
+          if (index == 1) Navigator.pushReplacementNamed(context, AppRoutes.customerList);
+          if (index == 2) Navigator.pushReplacementNamed(context, AppRoutes.history);
+          if (index == 3) return;
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Trang chủ'),
+          BottomNavigationBarItem(icon: Icon(Icons.people_outline), label: 'Khách hàng'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Lịch sử'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), label: 'Cài đặt'),
+        ],
+      ),
     );
   }
 
@@ -267,7 +285,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           )
@@ -355,7 +373,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
       child: Column(children: children),
     );
@@ -374,7 +392,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.05),
+          color: Colors.blue.withValues(alpha: 0.05),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: const Color(0xFF2196F3), size: 22),

@@ -20,9 +20,11 @@ class _SyncScreenState extends State<SyncScreen> {
     final unsyncedBills = (await billingProvider.getAllBills()).where((b) => !b.isSynced).toList();
 
     if (unsyncedBills.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không có dữ liệu mới cần đồng bộ.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không có dữ liệu mới cần đồng bộ.')),
+        );
+      }
       return;
     }
 
@@ -31,10 +33,8 @@ class _SyncScreenState extends State<SyncScreen> {
     // Giả lập gửi dữ liệu lên server
     await Future.delayed(const Duration(seconds: 2));
 
-    // Cập nhật trạng thái đã đồng bộ cho các bill
-    for (var bill in unsyncedBills) {
-      bill.isSynced = true;
-    }
+    // Cập nhật trạng thái đã đồng bộ cho các bill thông qua Provider
+    await billingProvider.markBillsAsSynced(unsyncedBills);
 
     setState(() => _isSyncing = false);
     

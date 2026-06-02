@@ -16,16 +16,33 @@ class AuthProvider with ChangeNotifier {
     // Giả lập delay mạng
     await Future.delayed(const Duration(seconds: 1));
 
-    // Luôn cho phép đăng nhập để tiện kiểm tra
-    _user = User(
-      username: username.isEmpty ? 'nhanvien01' : username,
-      fullName: 'Nguyễn Văn A',
-      role: 'Nhân viên ghi số',
-    );
-    
-    _isLoading = false;
-    notifyListeners();
-    return true;
+    // Danh sách tài khoản giả lập cho phân quyền
+    final mockUsers = [
+      {'user': 'admin', 'pass': 'admin123', 'name': 'Quản Trị Viên', 'role': 'admin'},
+      {'user': 'nhanvien01', 'pass': '123456', 'name': 'Nguyễn Văn A', 'role': 'staff'},
+      {'user': 'khachhang01', 'pass': '654321', 'name': 'Lê Minh Triết', 'role': 'user'},
+      {'user': 'abc', 'pass': '123', 'name': 'Khách Hàng Mới', 'role': 'user'},
+    ];
+
+    try {
+      final userData = mockUsers.firstWhere(
+        (u) => u['user'] == username && u['pass'] == password
+      );
+
+      _user = User(
+        username: userData['user']!,
+        fullName: userData['name']!,
+        role: userData['role']!,
+      );
+      
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   void logout() {

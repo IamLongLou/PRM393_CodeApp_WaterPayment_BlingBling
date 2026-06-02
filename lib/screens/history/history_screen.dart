@@ -98,6 +98,24 @@ class HistoryScreen extends StatelessWidget {
           );
         },
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 2, // Lịch sử
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          if (index == 0) Navigator.pushReplacementNamed(context, '/home');
+          if (index == 1) Navigator.pushReplacementNamed(context, '/customer-list');
+          if (index == 2) return;
+          if (index == 3) Navigator.pushReplacementNamed(context, '/settings');
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Trang chủ'),
+          BottomNavigationBarItem(icon: Icon(Icons.people_outline), label: 'Khách hàng'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Lịch sử'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), label: 'Cài đặt'),
+        ],
+      ),
     );
   }
 }

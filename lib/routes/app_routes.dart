@@ -22,7 +22,10 @@ class AppRoutes {
     splash: (context) => const SplashScreen(),
     login: (context) => const LoginScreen(),
     home: (context) => const HomeScreen(),
-    customerList: (context) => const CustomerListScreen(),
+    customerList: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      return CustomerListScreen(initialTabIndex: args?['tabIndex'] ?? 0);
+    },
     sync: (context) => const SyncScreen(),
     history: (context) => const HistoryScreen(),
     statistics: (context) => const StatisticsScreen(),

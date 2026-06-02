@@ -72,4 +72,40 @@ class Bill {
       isSynced: map['isSynced'] == 1,
     );
   }
+
+  Bill copyWith({
+    int? id,
+    int? customerId,
+    String? customerName,
+    String? customerCode,
+    String? billCode,
+    DateTime? date,
+    int? oldReading,
+    int? newReading,
+    double? consumption,
+    double? unitPrice,
+    double? amount,
+    double? vat,
+    double? totalAmount,
+    String? imagePath,
+    bool? isSynced,
+  }) {
+    return Bill(
+      id: id ?? this.id,
+      customerId: customerId ?? this.customerId,
+      customerName: customerName ?? this.customerName,
+      customerCode: customerCode ?? this.customerCode,
+      billCode: billCode ?? this.billCode,
+      date: date ?? this.date,
+      oldReading: oldReading ?? this.oldReading,
+      newReading: newReading ?? this.newReading,
+      consumption: consumption ?? this.consumption,
+      unitPrice: unitPrice ?? this.unitPrice,
+      amount: amount ?? this.amount,
+      vat: vat ?? this.vat,
+      totalAmount: totalAmount ?? this.totalAmount,
+      imagePath: imagePath ?? this.imagePath,
+      isSynced: isSynced ?? this.isSynced,
+    );
+  }
 }
