@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../providers/billing_provider.dart';
+import '../../providers/sync_provider.dart';
 import '../../routes/app_routes.dart';
 import '../../models/bill.dart';
 
@@ -13,13 +13,11 @@ class SyncScreen extends StatefulWidget {
 }
 
 class _SyncScreenState extends State<SyncScreen> {
-  bool _isSyncing = false;
 
   Future<void> _handleSync(BuildContext context) async {
-    final billingProvider = context.read<BillingProvider>();
-    final unsyncedBills = (await billingProvider.getAllBills()).where((b) => !b.isSynced).toList();
-
-    if (unsyncedBills.isEmpty) {
+    final syncProvider = context.read<SyncProvider>();
+    
+    if (syncProvider.unsyncedBills.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Không có dữ liệu mới cần đồng bộ.')),
@@ -28,15 +26,7 @@ class _SyncScreenState extends State<SyncScreen> {
       return;
     }
 
-    setState(() => _isSyncing = true);
-
-    // Giả lập gửi dữ liệu lên server
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Cập nhật trạng thái đã đồng bộ cho các bill thông qua Provider
-    await billingProvider.markBillsAsSynced(unsyncedBills);
-
-    setState(() => _isSyncing = false);
+    await syncProvider.syncAll();
     
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -49,57 +39,58 @@ class _SyncScreenState extends State<SyncScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SyncProvider>().fetchUnsyncedBills();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final billingProvider = context.watch<BillingProvider>();
+    final syncProvider = context.watch<SyncProvider>();
+    final unsyncedBills = syncProvider.unsyncedBills;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return FutureBuilder<List<Bill>>(
-      future: billingProvider.getAllBills(),
-      builder: (context, snapshot) {
-        final allBills = snapshot.data ?? [];
-        final unsyncedBills = allBills.where((b) => !b.isSynced).toList();
-
-        return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: AppBar(
-            title: const Text('Trung tâm Đồng bộ', style: TextStyle(fontWeight: FontWeight.bold)),
-            elevation: 0,
-            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-            foregroundColor: isDark ? Colors.white : Colors.black,
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: const Text('Trung tâm Đồng bộ', style: TextStyle(fontWeight: FontWeight.bold)),
+        elevation: 0,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: isDark ? Colors.white : Colors.black,
+      ),
+      body: Column(
+        children: [
+          _buildHeader(unsyncedBills.length),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('DANH SÁCH PHIẾU THU', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(5)),
+                  child: Text('${unsyncedBills.length} bản ghi', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                )
+              ],
+            ),
           ),
-          body: Column(
-            children: [
-              _buildHeader(unsyncedBills.length),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('DANH SÁCH PHIẾU THU', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(5)),
-                      child: Text('${unsyncedBills.length} bản ghi', style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                child: unsyncedBills.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(15),
-                        itemCount: unsyncedBills.length,
-                        itemBuilder: (context, index) => _syncCard(unsyncedBills[index]),
-                      ),
-              ),
-              _infoBox(),
-              _buildSyncButton(context, unsyncedBills.length),
-            ],
+          Expanded(
+            child: unsyncedBills.isEmpty
+                ? _buildEmptyState()
+                : ListView.builder(
+                    padding: const EdgeInsets.all(15),
+                    itemCount: unsyncedBills.length,
+                    itemBuilder: (context, index) => _syncCard(unsyncedBills[index]),
+                  ),
           ),
-          bottomNavigationBar: _buildBottomNav(context),
-        );
-      },
+          _infoBox(),
+          _buildSyncButton(context, unsyncedBills.length, syncProvider.isSyncing),
+        ],
+      ),
+      bottomNavigationBar: _buildBottomNav(context),
     );
   }
 
@@ -238,17 +229,17 @@ class _SyncScreenState extends State<SyncScreen> {
     );
   }
 
-  Widget _buildSyncButton(BuildContext context, int count) {
+  Widget _buildSyncButton(BuildContext context, int count, bool isSyncing) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
           ElevatedButton.icon(
-            onPressed: _isSyncing ? null : () => _handleSync(context),
-            icon: _isSyncing 
+            onPressed: isSyncing ? null : () => _handleSync(context),
+            icon: isSyncing 
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                 : const Icon(Icons.sync),
-            label: Text(_isSyncing ? 'Đang đồng bộ...' : 'Đồng bộ Ngay'),
+            label: Text(isSyncing ? 'Đang đồng bộ...' : 'Đồng bộ Ngay'),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00E5FF),
               minimumSize: const Size(double.infinity, 55),

@@ -224,7 +224,26 @@ class PaymentScreen extends StatelessWidget {
   }
 
   void _confirmPayment(BuildContext context, int consumption, double total) async {
-    final bill = Bill(customerId: customer.id!, billCode: 'INV-20231024-8892', date: DateTime.now(), oldReading: customer.currentReading, newReading: newReading, consumption: consumption.toDouble(), unitPrice: 12000, amount: total / 1.1, vat: total - (total/1.1), totalAmount: total, isSynced: false);
+    final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    final String randomSuffix = (1000 + (DateTime.now().microsecond % 9000)).toString();
+    final String billCode = 'INV-${customer.code}-$timestamp-$randomSuffix';
+
+    final bill = Bill(
+      customerId: customer.id!, 
+      customerName: customer.name,
+      customerCode: customer.code,
+      billCode: billCode, 
+      date: DateTime.now(), 
+      oldReading: customer.currentReading, 
+      newReading: newReading, 
+      consumption: consumption.toDouble(), 
+      unitPrice: 12000, 
+      amount: total / 1.1, 
+      vat: total - (total/1.1), 
+      totalAmount: total, 
+      isSynced: false
+    );
+
     context.read<BillingProvider>().saveBill(bill);
     context.read<CustomerProvider>().updateCustomerReading(customer.id!, newReading);
     Navigator.push(context, MaterialPageRoute(builder: (_) => ReceiptScreen(customer: customer, bill: bill)));

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
+import '../services/database_helper.dart';
+import '../services/api_service.dart';
 
 class AuthProvider with ChangeNotifier {
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   User? _user;
   bool _isLoading = false;
 
@@ -9,42 +12,54 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _user != null;
 
+  AuthProvider() {
+    _checkLastSession();
+  }
+
+  Future<void> _checkLastSession() async {
+    _user = await _dbHelper.getLastSession();
+    notifyListeners();
+  }
+
   Future<bool> login(String username, String password) async {
     _isLoading = true;
     notifyListeners();
 
-    // Giả lập delay mạng
-    await Future.delayed(const Duration(seconds: 1));
+    // 1. Gọi API Online thật
+    final response = await ApiService.login(username, password);
 
-    // Danh sách tài khoản giả lập cho phân quyền
-    final mockUsers = [
-      {'user': 'admin', 'pass': 'admin123', 'name': 'Quản Trị Viên', 'role': 'admin', 'email': 'admin@water.com', 'phone': '0987654321'},
-      {'user': 'nhanvien01', 'pass': '123456', 'name': 'Nguyễn Văn A', 'role': 'staff', 'email': 'nguyenvana@gmail.com', 'phone': '0912345678'},
-      {'user': 'khachhang01', 'pass': '654321', 'name': 'Lê Minh Triết', 'role': 'user', 'email': 'trietle@gmail.com', 'phone': '0901234567'},
-      {'user': 'abc', 'pass': '123', 'name': 'Khách Hàng Mới', 'role': 'user', 'email': 'abc@gmail.com', 'phone': '0900000000'},
-    ];
-
-    try {
-      final userData = mockUsers.firstWhere(
-        (u) => u['user'] == username && u['pass'] == password
-      );
+    if (response != null) {
+      final userData = response['user'];
+      final token = response['token'];
 
       _user = User(
-        username: userData['user']!,
-        fullName: userData['name']!,
-        role: userData['role']!,
+        username: userData['username'],
+        fullName: userData['fullName'],
+        role: userData['role'],
         email: userData['email'],
         phone: userData['phone'],
       );
       
+      // Lưu session vào SQLite để dùng offline
+      await _dbHelper.saveSession(_user!, token);
+      
       _isLoading = false;
       notifyListeners();
       return true;
-    } catch (e) {
-      _isLoading = false;
-      notifyListeners();
-      return false;
+    } else {
+      // 2. Xử lý Offline unlock nếu API lỗi/không có mạng
+      final lastUser = await _dbHelper.getLastSession();
+      if (lastUser != null && lastUser.username == username) {
+        _user = lastUser;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
     }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
   }
 
   Future<bool> updateProfile(String name, String email, String phone) async {
@@ -77,8 +92,9 @@ class AuthProvider with ChangeNotifier {
     return false;
   }
 
-  void logout() {
+  Future<void> logout() async {
     _user = null;
+    await _dbHelper.clearSession();
     notifyListeners();
   }
 }

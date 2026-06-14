@@ -1,60 +1,22 @@
 import 'package:flutter/material.dart';
 import '../models/bill.dart';
+import '../services/database_helper.dart';
+import '../services/api_service.dart';
 
 class SyncProvider with ChangeNotifier {
-  // Dữ liệu viết sẵn cho 3 bản ghi chờ đồng bộ theo yêu cầu
-  List<Bill> _unsyncedBills = [
-    Bill(
-      id: 101,
-      customerId: 1, // Lưu Bị
-      billCode: 'KH001',
-      date: DateTime(2024, 6, 5, 14, 31),
-      oldReading: 110,
-      newReading: 126,
-      consumption: 16,
-      unitPrice: 12000,
-      amount: 192000,
-      vat: 19200,
-      totalAmount: 211200,
-      isSynced: false,
-    ),
-    Bill(
-      id: 102,
-      customerId: 2, // Quan Vũ
-      billCode: 'KH002',
-      date: DateTime(2024, 6, 5, 14, 32),
-      oldReading: 70,
-      newReading: 127,
-      consumption: 57,
-      unitPrice: 12000,
-      amount: 684000,
-      vat: 68400,
-      totalAmount: 752400,
-      isSynced: false,
-    ),
-    Bill(
-      id: 103,
-      customerId: 5, // Tào Tháo
-      billCode: 'KH005',
-      date: DateTime(2024, 6, 5, 14, 33),
-      oldReading: 320,
-      newReading: 345,
-      consumption: 25,
-      unitPrice: 12000,
-      amount: 300000,
-      vat: 30000,
-      totalAmount: 330000,
-      isSynced: false,
-    ),
-  ];
-  
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  List<Bill> _unsyncedBills = [];
   bool _isSyncing = false;
 
   List<Bill> get unsyncedBills => _unsyncedBills;
   bool get isSyncing => _isSyncing;
 
+  SyncProvider() {
+    fetchUnsyncedBills();
+  }
+
   Future<void> fetchUnsyncedBills() async {
-    // Không cần fetch từ DB để demo chạy ngay
+    _unsyncedBills = await _dbHelper.getUnsyncedBills();
     notifyListeners();
   }
 
@@ -64,10 +26,17 @@ class SyncProvider with ChangeNotifier {
     _isSyncing = true;
     notifyListeners();
 
-    // Giả lập quá trình đồng bộ
-    await Future.delayed(const Duration(seconds: 2));
+    // 1. Gọi API để đẩy dữ liệu lên SQL Server thật
+    final response = await ApiService.syncBills(_unsyncedBills);
+    
+    if (response != null) {
+      // 2. Cập nhật trạng thái isSynced = 1 trong SQLite
+      await _dbHelper.markBillsAsSynced(_unsyncedBills);
+      
+      // 3. Clear danh sách local
+      _unsyncedBills = [];
+    }
 
-    _unsyncedBills = [];
     _isSyncing = false;
     notifyListeners();
   }
