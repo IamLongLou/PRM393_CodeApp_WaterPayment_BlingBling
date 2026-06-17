@@ -1,57 +1,86 @@
-# Water Billing Collection System - PRM393
+# 💧 Water Billing Collection System - PRM393
 
-Dự án phát triển hệ thống thu tiền nước hoàn chỉnh bằng Flutter dành cho nhân viên ghi chỉ số (Sử dụng AI).
-
-## 📝 Hướng dẫn Luồng Nghiệp vụ (AI Prompt Reference)
-
-Dưới đây là mô tả chi tiết luồng hoạt động của ứng dụng để phục vụ việc phát triển và bảo trì. 
-*Lưu ý: 
+Hệ thống quản lý và thu tiền nước hiện đại được phát triển bằng **Flutter**, hỗ trợ nhân viên ghi chỉ số nước tại hiện trường một cách nhanh chóng và chính xác.
 
 ---
 
-### 1. Khởi động & Truy cập (Phần 1)
-- **Splash Screen:** Màn hình khởi chạy với màu xanh đậm (`#1A237E`). Hiển thị logo Water Billing và thanh tiến trình trong 3 giây trước khi tự động chuyển sang Login.
-- **Login Screen:** Giao diện đăng nhập tập trung. Hỗ trợ đăng nhập nhanh để demo: nhập bất kỳ thông tin nào hoặc sử dụng `nhanvien01`/`123456` để vào Dashboard.
-- **Home Dashboard:** Trung tâm điều hướng với 4 thẻ chức năng chính:
-    - **Khách hàng (Tím):** Quản lý danh sách hộ dân.
-    - **Đồng bộ (Xanh ngọc):** Quản lý dữ liệu chưa tải lên server.
-    - **Thống kê (Xanh dương):** Biểu đồ tiêu thụ cá nhân/khu vực.
-    - **Lịch sử (Cam):** Tra cứu toàn bộ hóa đơn đã thu.
+## 🚀 Tính năng chính
 
-### 2. Quy trình Thu tiền & Ghi chỉ số (Phần 2)
-- **Danh sách khách hàng:** Hiển thị dưới dạng Card với tên (Nguyen Bao Long, Pham Tu Anh...), địa chỉ và Badge lượng nước hiện tại. Hỗ trợ tìm kiếm thời gian thực.
-- **Chi tiết khách hàng:** Hiển thị thông tin liên lạc, vị trí và thẻ chỉ số nước hiện tại (`currentReading`).
-- **Lịch sử khách hàng:** Liệt kê các hóa đơn cũ (Tháng, Chỉ số đầu/cuối, Tiêu thụ, Thành tiền). 
-- **Ghi chỉ số (Màn 7):** Kích hoạt khi nhấn vào một tháng trong lịch sử. Nhân viên nhập chỉ số mới. Hệ thống tự động kiểm tra: `Chỉ số mới >= Chỉ số cũ`.
-- **Chụp ảnh (Màn 8):** Màn hình xác nhận ảnh công tơ. Hiện tại đang giả lập ảnh đồng hồ nước mẫu để chạy mượt mà trên môi trường Web/Chrome.
+### 1. Quản lý Khách hàng & Tra cứu
+- **Danh sách thông minh:** Hiển thị danh sách hộ dân với trạng thái thanh toán và chỉ số nước gần nhất.
+- **Tìm kiếm thời gian thực:** Tìm kiếm khách hàng theo tên hoặc địa chỉ ngay lập tức.
+- **Lịch sử tiêu thụ:** Tra cứu chi tiết các hóa đơn cũ, chỉ số đầu/cuối và lượng nước tiêu thụ qua các tháng.
 
-### 3. Thanh toán & Biên lai (Phần 3)
-- **Thanh toán (Màn 9):** Tự động tính toán: `Tiêu thụ = Mới - Cũ`. Áp đơn giá 12.000đ/m³ và VAT 10%. Hiển thị tổng tiền nổi bật với màu hồng (`accentPink`).
-- **Biên lai (Màn 10):** Sau khi xác nhận, hệ thống sinh mã hóa đơn duy nhất, cập nhật trạng thái khách hàng thành "Đã hoàn thành" và hiển thị mã QR Code để kiểm tra.
-- **Cập nhật tức thì:** Hóa đơn mới sẽ tự động xuất hiện tại đầu danh sách Lịch sử và cập nhật `currentReading` của khách hàng đó ngay lập tức mà không cần load lại trang.
+### 2. Ghi chỉ số & Thanh toán (AI Reference)
+- **Ghi chỉ số nhanh:** Nhập chỉ số mới với cơ chế kiểm soát lỗi (Chỉ số mới phải ≥ Chỉ số cũ).
+- **Tính toán tự động:** Hệ thống tự động tính toán lượng tiêu thụ, áp đơn giá (12.000đ/m³) và thuế VAT.
+- **Biên lai QR Code:** Xuất hóa đơn ngay lập tức với mã QR duy nhất để khách hàng đối soát.
+- **Chụp ảnh minh chứng:** Tích hợp camera chụp ảnh đồng hồ nước để lưu trữ bằng chứng (Đang giả lập cho bản Web).
 
-### 4. Thống kê & Đồng bộ (Phần 4)
-- **Thống kê (Bảng 11):** Giao diện Modern White UI.
-    - Thanh chọn khách hàng nằm ngang với Avatar.
-    - Thẻ trạng thái "Đã thanh toán" đen sang trọng.
-    - 4 thẻ Summary: Tổng tiêu thụ, Chi phí, Trung bình, Lần ghi cuối.
-    - Biểu đồ BarChart thống kê tương quan tiêu thụ 6 tháng.
-- **Đồng bộ (Bảng 12):** Giao diện Teal UI.
-    - Banner cảnh báo "3 bản ghi chờ đồng bộ".
-    - Danh sách các phiếu thu chưa được đẩy lên cloud (Pending).
-    - Nút "Sync Now" thực hiện đẩy dữ liệu và làm sạch danh sách chờ.
+### 3. Thống kê & Đồng bộ
+- **Dashboard trực quan:** Biểu đồ cột (Bar Chart) so sánh lượng tiêu thụ trong 6 tháng gần nhất.
+- **Thẻ tóm tắt:** Tổng tiêu thụ, doanh thu, trung bình và lần ghi cuối.
+- **Chế độ Offline & Sync:** Lưu dữ liệu tạm thời khi không có mạng và đồng bộ (Sync) lên Server khi có kết nối.
 
 ---
 
 ## 🛠 Công nghệ sử dụng
-- **Framework:** Flutter 3.x (Hỗ trợ Web/Android/iOS)
-- **State Management:** Provider
-- **Charts:** fl_chart
-- **QR Code:** qr_flutter
-- **Mock Data:** Dữ liệu được viết sẵn (hardcoded) trong các Provider để đảm bảo ứng dụng luôn chạy được ngay cả khi không có kết nối Database thật trên trình duyệt.
 
-## 🚀 Cách chạy ứng dụng
-1. Mở thư mục dự án trong Android Studio hoặc VS Code.
-2. Chạy lệnh: `flutter pub get` để tải các thư viện.
-3. Chạy lệnh: `flutter run -d chrome` (hoặc chọn thiết bị giả lập).
-4. Đăng nhập với bất kỳ thông tin nào để bắt đầu trải nghiệm.
+- **Core:** Flutter 3.x & Dart
+- **State Management:** `Provider` (Kiến trúc sạch, dễ bảo trì)
+- **Database:** `Sqflite` (Lưu trữ cục bộ cho Android/iOS)
+- **UI Components:**
+  - `fl_chart`: Biểu đồ thống kê.
+  - `qr_flutter`: Tạo mã QR hóa đơn.
+  - `google_fonts`: Font chữ hiện đại (Be Vietnam Pro).
+- **Backend:** Java Spring Boot (Optional - Hiện tại đang sử dụng Mock Data cho mục đích Demo).
+
+---
+
+## 📦 Hướng dẫn cài đặt và chạy
+
+Để chạy dự án này trên máy cục bộ, bạn hãy thực hiện các bước sau:
+
+1. **Yêu cầu:** Máy đã cài đặt [Flutter SDK](https://docs.flutter.dev/get-started/install).
+2. **Clone dự án:**
+   ```bash
+   git clone https://github.com/IamLongLou/PRM393-CodeApp-ThuTienNuoc-VibeCoding-.git
+   cd PRM393-CodeApp-ThuTienNuoc-VibeCoding-
+   ```
+3. **Cài đặt thư viện:**
+   ```bash
+   flutter pub get
+   ```
+4. **Chạy ứng dụng:**
+   - Chạy trên trình duyệt (Web):
+     ```bash
+     flutter run -d chrome
+     ```
+   - Chạy trên thiết bị Android/iOS:
+     ```bash
+     flutter run
+     ```
+
+---
+
+## 📂 Cấu trúc thư mục (Clean Architecture)
+
+```
+lib/
+├── core/            # Chứa các hằng số, theme, utils dùng chung
+├── models/          # Các đối tượng dữ liệu (User, Customer, Bill)
+├── providers/       # Quản lý trạng thái ứng dụng (Logic xử lý dữ liệu)
+├── screens/         # Giao diện người dùng (Auth, Home, Customer, Sync...)
+├── services/        # Xử lý API và Database cục bộ
+└── widgets/         # Các component UI tái sử dụng (CustomerCard, CustomButton...)
+```
+
+---
+
+## 👤 Thông tin phát triển
+- **Dự án:** PRM393 - Mobile Application Development
+- **Tác giả:** [IamLongLou](https://github.com/IamLongLou)
+- **Trạng thái:** Đang phát triển (Beta)
+
+---
+*Lưu ý: Đăng nhập demo với tài khoản bất kỳ hoặc `nhanvien01`/`123456`.*
