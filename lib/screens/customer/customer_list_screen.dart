@@ -9,8 +9,9 @@ import '../../routes/app_routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/formatter_utils.dart';
 
+/// Màn hình danh sách khách hàng (Chia thành 2 tab: Chưa thu và Đã thu)
 class CustomerListScreen extends StatefulWidget {
-  final int initialTabIndex;
+  final int initialTabIndex; // Tab mặc định khi mở màn hình
   const CustomerListScreen({super.key, this.initialTabIndex = 0});
 
   @override
@@ -29,6 +30,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
       vsync: this, 
       initialIndex: widget.initialTabIndex
     );
+    // Lắng nghe sự kiện chuyển đổi tab để cập nhật tiêu đề Header
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() {});
@@ -57,8 +59,8 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildPendingTab(),
-                  _buildCompletedTab(),
+                  _buildPendingTab(), // Tab danh sách khách hàng chưa thu tiền
+                  _buildCompletedTab(), // Tab lịch sử khách hàng đã hoàn tất
                 ],
               ),
             ),
@@ -69,6 +71,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
     );
   }
 
+  /// Widget thanh tiêu đề và nút quay lại
   Widget _buildHeader(BuildContext context) {
     String title = _tabController.index == 0 ? 'Chưa thu tiền' : 'Lịch sử thu';
     return Padding(
@@ -96,6 +99,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
     );
   }
 
+  /// Widget ô tìm kiếm và bộ lọc
   Widget _buildSearchAndFilter() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -116,6 +120,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
             ),
           ),
           const SizedBox(width: 10),
+          // Nút bộ lọc (Tune)
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(color: Theme.of(context).cardTheme.color, borderRadius: BorderRadius.circular(12)),
@@ -126,6 +131,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
     );
   }
 
+  /// Widget chuyển đổi Tab (Chưa thu / Đã thu)
   Widget _buildTabSwitcher() {
     return Container(
       margin: const EdgeInsets.all(20),
@@ -143,25 +149,30 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
     );
   }
 
+  /// Nội dung Tab khách hàng chưa thu
   Widget _buildPendingTab() {
     return Consumer<CustomerProvider>(
       builder: (context, provider, _) {
         if (provider.isLoading && provider.customers.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
+        // Lọc khách hàng chưa hoàn tất ghi số/thu tiền
         final list = provider.customers.where((c) => c.status != CollectionStatus.completed).toList();
         return _buildListView(list, isPending: true);
       },
     );
   }
 
+  /// Nội dung Tab khách hàng đã hoàn tất
   Widget _buildCompletedTab() {
     return Consumer2<CustomerProvider, BillingProvider>(
       builder: (context, custProv, billProv, _) {
         if (custProv.isLoading && custProv.customers.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
+        // Lọc khách hàng đã hoàn tất
         final list = custProv.customers.where((c) => c.status == CollectionStatus.completed).toList();
+        
         return FutureBuilder<List<Bill>>(
           future: Provider.of<BillingProvider>(context, listen: false).getAllBills(),
           builder: (context, snapshot) {
@@ -169,6 +180,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
             if (snapshot.hasData) {
               final List<Bill> bills = snapshot.data!;
               final today = DateTime.now();
+              // Tính tổng tiền đã thu trong ngày hôm nay
               totalToday = bills
                 .where((b) => b.date.day == today.day && b.date.month == today.month)
                 .fold(0.0, (sum, b) => sum + b.totalAmount);
@@ -185,6 +197,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
     );
   }
 
+  /// Banner hiển thị tổng thu trong ngày
   Widget _buildSummaryBanner(double total) {
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
@@ -204,18 +217,21 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
     );
   }
 
+  /// Hàm xây dựng danh sách cuộn
   Widget _buildListView(List<Customer> list, {required bool isPending}) {
-    if (list.isEmpty) return const Center(child: Text('Trống'));
+    if (list.isEmpty) return const Center(child: Text('Không có dữ liệu'));
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       itemCount: list.length + 1,
       itemBuilder: (context, index) {
         if (index == list.length) return _buildFooter();
+        // Sử dụng CustomerCard để hiển thị thông tin mỗi khách hàng
         return CustomerCard(customer: list[index]);
       },
     );
   }
 
+  /// Widget chân trang hiển thị thông tin công ty
   Widget _buildFooter() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 30),
@@ -232,6 +248,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> with SingleTick
     );
   }
 
+  /// Thanh điều hướng Bottom Nav
   Widget _buildBottomNav(BuildContext context) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,

@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/customer_provider.dart';
 import '../../routes/app_routes.dart';
 
+/// Màn hình đăng nhập của ứng dụng
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -12,9 +13,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // Bộ điều khiển cho các ô nhập liệu
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _rememberMe = false;
+  bool _rememberMe = false; // Trạng thái ghi nhớ đăng nhập
 
   @override
   void dispose() {
@@ -23,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  /// Hiển thị thông báo (SnackBar) tùy chỉnh
   void _showNotification(String message, bool isSuccess) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -74,12 +77,13 @@ class _LoginScreenState extends State<LoginScreen> {
         margin: EdgeInsets.only(
           bottom: MediaQuery.of(context).size.height - 70,
           left: 20,
-          right: 120, // Làm cho thông báo bé lại và không kéo dài hết màn hình
+          right: 120, 
         ),
       ),
     );
   }
 
+  /// Xử lý sự kiện đăng nhập
   void _handleLogin() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.login(
@@ -89,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (mounted) {
       if (success) {
-        // Làm mới danh sách khách hàng ngay sau khi login thành công
+        // Làm mới danh sách khách hàng ngay sau khi login thành công để lấy dữ liệu mới nhất
         Provider.of<CustomerProvider>(context, listen: false).refresh();
 
         _showNotification('Đăng nhập thành công!', true);
@@ -114,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: [
               const SizedBox(height: 60),
-              // Logo
+              // Biểu tượng Logo
               Center(
                 child: Container(
                   padding: const EdgeInsets.all(25),
@@ -140,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 50),
 
-              // Form fields
+              // Ô nhập Tên đăng nhập
               _buildFieldLabel('Tên đăng nhập'),
               TextField(
                 controller: _usernameController,
@@ -156,6 +160,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 25),
+              
+              // Ô nhập Mật khẩu
               _buildFieldLabel('Mật khẩu'),
               TextField(
                 controller: _passwordController,
@@ -172,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              // Remember me & Forgot pass
+              // Ghi nhớ đăng nhập & Quên mật khẩu
               const SizedBox(height: 15),
               Row(
                 children: [
@@ -196,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 30),
 
-              // Login Button
+              // Nút Đăng nhập
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -214,13 +220,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text('Đăng nhập hệ thống', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                            SizedBox(width: 10),
-                            Icon(Icons.arrow_forward, size: 20),
+                            const SizedBox(width: 10),
+                            const Icon(Icons.arrow_forward, size: 20),
                           ],
                         ),
                 ),
               ),
 
+              // Thông tin phiên bản và bản quyền
               const SizedBox(height: 60),
               const Text('ⓘ PHIÊN BẢN 2.4.0 (BUILD 2026125)', style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
               const SizedBox(height: 5),
@@ -237,6 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  /// Hàm xây dựng tiêu đề cho các ô nhập liệu
   Widget _buildFieldLabel(String label) {
     return Align(
       alignment: Alignment.centerLeft,

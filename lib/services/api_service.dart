@@ -1,18 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart'; // Thêm để dùng kIsWeb
+import 'package:flutter/foundation.dart'; // Dùng kIsWeb để kiểm tra nền tảng
 import '../models/bill.dart';
 
+/// Lớp xử lý các gọi API đến Backend (Spring Boot)
 class ApiService {
-  // Tự động chọn URL phù hợp: Web dùng localhost, Android dùng 10.0.2.2
-  // Thử bỏ /api nếu backend của bạn không có context-path này
+  // Tự động chọn URL phù hợp: Web dùng localhost, Android Emulator dùng 10.0.2.2
   static String get baseUrl => kIsWeb 
     ? 'http://localhost:8080/api' 
     : 'http://10.0.2.2:8080/api';
 
+  /// Hàm đăng nhập người dùng
   static Future<Map<String, dynamic>?> login(String u, String p) async {
     try {
-      print('Calling Login: $baseUrl/auth/login');
+      print('Đang gọi Đăng nhập: $baseUrl/auth/login');
       final res = await http.post(
         Uri.parse('$baseUrl/auth/login'), 
         headers: {
@@ -21,30 +22,32 @@ class ApiService {
         }, 
         body: jsonEncode({'username': u, 'password': p})
       );
-      print('Login Status: ${res.statusCode}');
+      print('Trạng thái Đăng nhập: ${res.statusCode}');
       if (res.statusCode == 200) return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
-      print('Login error: $e');
+      print('Lỗi đăng nhập: $e');
     }
     return null;
   }
 
+  /// Lấy toàn bộ dữ liệu ban đầu từ Server (Khách hàng, Hóa đơn)
   static Future<Map<String, dynamic>?> bootstrap() async {
     try {
-      print('Calling Bootstrap: $baseUrl/bootstrap');
+      print('Đang gọi Bootstrap: $baseUrl/bootstrap');
       final res = await http.get(Uri.parse('$baseUrl/bootstrap'));
-      print('Bootstrap Status: ${res.statusCode}');
+      print('Trạng thái Bootstrap: ${res.statusCode}');
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
-        print('Data received: ${data['customers']?.length} customers');
+        print('Dữ liệu nhận được: ${data['customers']?.length} khách hàng');
         return data;
       }
     } catch (e) {
-      print('Bootstrap error: $e');
+      print('Lỗi Bootstrap: $e');
     }
     return null;
   }
 
+  /// Đồng bộ danh sách hóa đơn mới lên Server
   static Future<bool> syncBills(List<Bill> bills) async {
     try {
       final res = await http.post(
@@ -54,7 +57,7 @@ class ApiService {
       );
       return res.statusCode == 200;
     } catch (e) {
-      print('Sync error: $e');
+      print('Lỗi đồng bộ: $e');
     }
     return false;
   }

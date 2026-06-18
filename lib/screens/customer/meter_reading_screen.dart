@@ -3,8 +3,9 @@ import 'package:intl/intl.dart';
 import '../../models/customer.dart';
 import 'photo_capture_screen.dart';
 
+/// Màn hình nhập chỉ số nước mới cho khách hàng
 class MeterReadingScreen extends StatefulWidget {
-  final Customer customer;
+  final Customer customer; // Khách hàng đang được ghi số
   const MeterReadingScreen({super.key, required this.customer});
 
   @override
@@ -12,14 +13,17 @@ class MeterReadingScreen extends StatefulWidget {
 }
 
 class _MeterReadingScreenState extends State<MeterReadingScreen> {
-  String _newReadingText = "";
+  String _newReadingText = ""; // Biến lưu chuỗi ký tự chỉ số mới đang nhập
 
+  /// Xử lý khi nhấn phím trên bàn phím số
   void _onKeyTap(String key) {
     if (key == "del") {
+      // Xóa ký tự cuối
       if (_newReadingText.isNotEmpty) {
         setState(() => _newReadingText = _newReadingText.substring(0, _newReadingText.length - 1));
       }
     } else {
+      // Giới hạn nhập tối đa 5 chữ số
       if (_newReadingText.length < 5) {
         setState(() => _newReadingText += key);
       }
@@ -44,6 +48,7 @@ class _MeterReadingScreenState extends State<MeterReadingScreen> {
               child: IntrinsicHeight(
                 child: Column(
                   children: [
+                    // Thông tin tháng và loại đồng hồ
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       child: Row(
@@ -56,6 +61,7 @@ class _MeterReadingScreenState extends State<MeterReadingScreen> {
                     ),
                     _buildUserHeader(),
                     const SizedBox(height: 20),
+                    // So sánh chỉ số Cũ và Mới
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
@@ -69,12 +75,15 @@ class _MeterReadingScreenState extends State<MeterReadingScreen> {
                     const SizedBox(height: 20),
                     const Text('Vui lòng nhập chỉ số mới từ mặt đồng hồ khách hàng', style: TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic)),
                     const Spacer(),
+                    // Bàn phím số tự định nghĩa
                     _buildNumericKeypad(),
+                    // Nút Tiếp tục
                     Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: ElevatedButton(
                         onPressed: _newReadingText.isEmpty ? null : () {
                           int newReading = int.parse(_newReadingText);
+                          // Kiểm tra logic: chỉ số mới không được nhỏ hơn chỉ số cũ
                           if (newReading < widget.customer.currentReading) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -84,6 +93,7 @@ class _MeterReadingScreenState extends State<MeterReadingScreen> {
                             );
                             return;
                           }
+                          // Chuyển sang màn hình chụp ảnh xác nhận
                           Navigator.push(context, MaterialPageRoute(builder: (_) => PhotoCaptureScreen(customer: widget.customer, newReading: newReading)));
                         },
                         style: ElevatedButton.styleFrom(backgroundColor: _newReadingText.isEmpty ? Colors.grey[200] : Colors.blue, foregroundColor: _newReadingText.isEmpty ? Colors.grey : Colors.white),
@@ -100,6 +110,7 @@ class _MeterReadingScreenState extends State<MeterReadingScreen> {
     );
   }
 
+  /// Thông tin khách hàng tóm tắt phía trên
   Widget _buildUserHeader() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -119,7 +130,7 @@ class _MeterReadingScreenState extends State<MeterReadingScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(widget.customer.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black)),
-                Text('# PE120005678', style: TextStyle(color: isDark ? Colors.white60 : Colors.grey, fontSize: 11)),
+                Text('# ${widget.customer.code}', style: TextStyle(color: isDark ? Colors.white60 : Colors.grey, fontSize: 11)),
               ],
             ),
           ),
@@ -129,6 +140,7 @@ class _MeterReadingScreenState extends State<MeterReadingScreen> {
     );
   }
 
+  /// Ô hiển thị chỉ số (Cũ hoặc Mới)
   Widget _readingInputBox(String label, String value, {required bool isOld}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
@@ -163,6 +175,7 @@ class _MeterReadingScreenState extends State<MeterReadingScreen> {
     );
   }
 
+  /// Xây dựng bàn phím số
   Widget _buildNumericKeypad() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -181,6 +194,7 @@ class _MeterReadingScreenState extends State<MeterReadingScreen> {
     children: keys.map((k) => Expanded(child: _keyButton(k))).toList(),
   );
 
+  /// Nút bấm trên bàn phím số
   Widget _keyButton(String k) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     if (k == ".") return const Center(child: CircleAvatar(radius: 3, backgroundColor: Colors.grey));

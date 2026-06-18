@@ -12,7 +12,9 @@ import '../screens/profile/edit_profile_screen.dart';
 import '../screens/profile/change_password_screen.dart';
 import '../screens/notifications/notification_screen.dart';
 
+/// Lớp quản lý định tuyến (Navigation) cho ứng dụng
 class AppRoutes {
+  // Định nghĩa tên các đường dẫn (Route names)
   static const String splash = '/';
   static const String login = '/login';
   static const String home = '/home';
@@ -26,6 +28,7 @@ class AppRoutes {
   static const String changePassword = '/change-password';
   static const String notifications = '/notifications';
 
+  /// Khai báo bản đồ các Route và các Widget tương ứng
   static Map<String, WidgetBuilder> get routes => {
     splash: (context) => const SplashScreen(),
     login: (context) => const LoginScreen(),

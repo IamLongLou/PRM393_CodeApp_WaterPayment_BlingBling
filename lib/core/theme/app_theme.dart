@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// Lớp cấu hình giao diện (Theme) cho toàn bộ ứng dụng
 class AppTheme {
+  // Định nghĩa các màu sắc chủ đạo
   static const Color primaryBlue = Color(0xFF2196F3);
   static const Color bgGrey = Color(0xFFF8F9FA);
   static const Color textBlack = Color(0xFF333333);
   static const Color textGrey = Color(0xFF9E9E9E);
   static const Color successGreen = Color(0xFF4CAF50);
 
+  /// Cấu hình Theme sáng (Light Mode)
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -53,6 +56,7 @@ class AppTheme {
     );
   }
 
+  /// Cấu hình Theme tối (Dark Mode)
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,

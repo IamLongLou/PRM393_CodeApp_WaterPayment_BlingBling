@@ -9,24 +9,28 @@ import '../screens/customer/receipt_screen.dart';
 import '../screens/customer/route_optimization_screen.dart';
 import 'package:intl/intl.dart';
 
+/// Thẻ hiển thị thông tin tóm tắt của một khách hàng trong danh sách
 class CustomerCard extends StatelessWidget {
   final Customer customer;
 
   const CustomerCard({super.key, required this.customer});
 
+  /// Thực hiện cuộc gọi điện thoại
   Future<void> _makeCall(String phone) async {
     final Uri launchUri = Uri(scheme: 'tel', path: phone);
     if (await canLaunchUrl(launchUri)) await launchUrl(launchUri);
   }
 
+  /// Thực hiện gửi tin nhắn SMS
   Future<void> _sendSMS(String phone) async {
     final Uri launchUri = Uri(scheme: 'sms', path: phone);
     if (await canLaunchUrl(launchUri)) await launchUrl(launchUri);
   }
 
+  /// Mở ứng dụng bản đồ (Google Maps hoặc Apple Maps) để chỉ đường
   Future<void> _openMap(String address) async {
-    final String googleMapsUrl = "https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(address)}&travelmode=driving";
-    final String appleMapsUrl = "http://maps.apple.com/?daddr=${Uri.encodeComponent(address)}";
+    final String googleMapsUrl = "https://www.google.com/maps/dir/?api=1&destination=\${Uri.encodeComponent(address)}&travelmode=driving";
+    final String appleMapsUrl = "http://maps.apple.com/?daddr=\${Uri.encodeComponent(address)}";
     
     final Uri googleUri = Uri.parse(googleMapsUrl);
     final Uri appleUri = Uri.parse(appleMapsUrl);
@@ -40,13 +44,15 @@ class CustomerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Tùy theo trạng thái khách hàng mà hiển thị giao diện khác nhau
     if (customer.status == CollectionStatus.completed) {
-      return _buildCompletedCard(context);
+      return _buildCompletedCard(context); // Giao diện khách hàng đã hoàn tất
     } else {
-      return _buildPendingCard(context);
+      return _buildPendingCard(context); // Giao diện khách hàng đang chờ xử lý
     }
   }
 
+  /// Giao diện thẻ dành cho khách hàng CHƯA ghi số/thu tiền
   Widget _buildPendingCard(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -64,7 +70,7 @@ class CustomerCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=${customer.id}'),
+                backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=\${customer.id}'),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -73,7 +79,7 @@ class CustomerCard extends StatelessWidget {
                   children: [
                     Text(customer.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     const SizedBox(height: 4),
-                    Text('MÃ KH: ${customer.code}', style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+                    Text('MÃ KH: \${customer.code}', style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -93,6 +99,7 @@ class CustomerCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
+          // Các nút hành động nhanh (Gọi, Nhắn tin, Bản đồ)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -109,6 +116,7 @@ class CustomerCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
+          // Thông tin chỉ số cũ
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
@@ -122,12 +130,13 @@ class CustomerCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 const Text('Chỉ số cũ', style: TextStyle(color: Colors.grey, fontSize: 13)),
                 const Spacer(),
-                Text('${customer.currentReading}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                Text('\${customer.currentReading}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                 const Text(' m³', style: TextStyle(color: Colors.grey, fontSize: 10)),
               ],
             ),
           ),
           const SizedBox(height: 12),
+          // Nút đi tới màn hình ghi số
           SizedBox(
             width: double.infinity,
             height: 48,
@@ -148,6 +157,7 @@ class CustomerCard extends StatelessWidget {
     );
   }
 
+  /// Giao diện thẻ dành cho khách hàng ĐÃ thu tiền xong
   Widget _buildCompletedCard(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     
@@ -158,9 +168,10 @@ class CustomerCard extends StatelessWidget {
         if (snapshot.hasData) {
           try {
             final List<Bill> bills = snapshot.data!;
+            // Lấy hóa đơn mới nhất của khách hàng này
             latestBill = bills.firstWhere((b) => b.customerId == customer.id);
           } catch (e) {
-            // No bill found for this customer yet
+            // Chưa tìm thấy hóa đơn
           }
         }
 
@@ -182,7 +193,7 @@ class CustomerCard extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=${customer.id}'),
+                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=\${customer.id}'),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -211,17 +222,11 @@ class CustomerCard extends StatelessWidget {
                 children: [
                   _actionIcon(Icons.phone_outlined, 'Gọi điện', Colors.green, () => _makeCall(customer.phone)),
                   _actionIcon(Icons.chat_bubble_outline, 'Nhắn tin', Colors.orange, () => _sendSMS(customer.phone)),
-                  _actionIcon(Icons.map_outlined, 'Bản đồ', Colors.blue, () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RouteOptimizationScreen(customer: customer),
-                      ),
-                    );
-                  }),
+                  _actionIcon(Icons.map_outlined, 'Bản đồ', Colors.blue, () => _openMap(customer.address)),
                 ],
               ),
               const SizedBox(height: 15),
+              // Thông tin kết quả thanh toán
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(color: Colors.blue.withOpacity(0.03), borderRadius: BorderRadius.circular(12)),
@@ -258,6 +263,7 @@ class CustomerCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
+              // Nút xem lại hóa đơn đã xuất
               SizedBox(
                 width: double.infinity,
                 child: TextButton.icon(
@@ -286,6 +292,7 @@ class CustomerCard extends StatelessWidget {
     );
   }
 
+  /// Hàm xây dựng các nút hành động (Gọi, Nhắn tin,...)
   Widget _actionIcon(IconData icon, String label, Color color, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
